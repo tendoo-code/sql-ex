@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:14.1
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.ru
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sql_ex
+      PGDATA: /data/postgres
+    volumes:
+      - './scripts/:/docker-entrypoint-initdb.d/'
+    ports:
+      - '5432:5432'
+    networks:
+      - postgres-net
+
+networks:
+  postgres-net: null
