@@ -95,3 +95,39 @@ FROM PC;
 SELECT AVG(speed)
 FROM Laptop
 WHERE price > 1000;
+
+-- Найдите среднюю скорость ПК, выпущенных производителем A.
+
+SELECT AVG(speed)
+FROM PC pc
+INNER JOIN product pr
+ON pc.model = pr.model
+WHERE pr.maker = 'A';
+
+-- Найдите класс, имя и страну для кораблей из таблицы Ships, имеющих не менее 10 орудий.
+
+SELECT s.class, name, country
+FROM ships s
+INNER JOIN classes c
+ON c.class = s.class
+WHERE c.numguns >= 10;
+
+-- Найдите размеры жестких дисков, совпадающих у двух и более PC.
+-- Вывести: HD
+
+SELECT hd
+FROM PC
+GROUP BY hd
+HAVING COUNT(hd) >= 2;
+
+-- Найдите пары моделей PC, имеющих одинаковые скорость и RAM. В результате каждая пара указывается только один раз,
+-- т.е. (i,j), но не (j,i),
+-- Порядок вывода: модель с большим номером, модель с меньшим номером, скорость и RAM.
+
+SELECT DISTINCT pc_1.model, pc_2.model, pc_1.speed, pc_1.ram
+FROM PC pc_1
+INNER JOIN PC pc_2
+ON pc_1.speed = pc_2.speed
+AND pc_1.ram = pc_2.ram
+AND pc_1.model != pc_2.model
+AND pc_1.model > pc_2.model;
