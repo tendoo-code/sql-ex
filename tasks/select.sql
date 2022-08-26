@@ -131,3 +131,38 @@ ON pc_1.speed = pc_2.speed
 AND pc_1.ram = pc_2.ram
 AND pc_1.model != pc_2.model
 AND pc_1.model > pc_2.model;
+
+-- Найдите модели ПК-блокнотов, скорость которых меньше скорости каждого из ПК.
+-- Вывести: type, model, speed
+
+SELECT DISTINCT type, l.model, speed
+FROM Laptop l
+INNER JOIN product p
+ON l.model = p.model
+WHERE speed < ALL (SELECT pc.speed FROM PC);
+
+-- Найдите производителей самых дешевых цветных принтеров. Вывести: maker, price
+
+SELECT DISTINCT maker, price
+FROM printer p1
+INNER JOIN product p2
+ON p1.model = p2.model
+WHERE price = (
+    SELECT MIN(price)
+    FROM printer
+    WHERE color = 'y'
+) AND color = 'y';
+
+-- Для каждого производителя, имеющего модели в таблице Laptop,
+-- найдите средний размер экрана выпускаемых им ПК-блокнотов.
+-- Вывести: maker, средний размер экрана.
+
+SELECT maker, AVG(screen) as Avg_screen
+FROM product p
+INNER JOIN laptop l
+ON p.model = l.model
+GROUP BY maker;
+
+-- Найдите производителей, выпускающих по меньшей мере три различных модели ПК.
+-- Вывести: Maker, число моделей ПК.
+
