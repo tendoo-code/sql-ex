@@ -166,3 +166,108 @@ GROUP BY maker;
 -- Найдите производителей, выпускающих по меньшей мере три различных модели ПК.
 -- Вывести: Maker, число моделей ПК.
 
+SELECT maker, COUNT(model) AS count_model
+FROM (
+        SELECT maker, model
+        FROM product
+        WHERE type = 'PC'
+    ) AS v
+GROUP BY maker
+HAVING COUNT(model) >= 3;
+
+-- Найдите максимальную цену ПК, выпускаемых каждым производителем,
+-- у которого есть модели в таблице PC.
+-- Вывести: maker, максимальная цена.
+
+SELECT maker, MAX(price) AS max_price
+FROM product p
+INNER JOIN pc p2
+ON p.model = p2.model
+GROUP BY maker;
+
+-- Для каждого значения скорости ПК, превышающего 600 МГц, определите среднюю цену ПК с такой же скоростью.
+-- Вывести: speed, средняя цена.
+
+SELECT speed, AVG(price)
+FROM pc
+WHERE speed > 600
+GROUP BY speed;
+
+-- Найдите производителей, которые производили бы как ПК
+-- со скоростью не менее 750 МГц, так и ПК-блокноты со скоростью не менее 750 МГц.
+-- Вывести: Maker
+
+SELECT maker
+FROM product p
+INNER JOIN pc p2
+ON p.model = p2.model
+WHERE speed >= 750
+INTERSECT
+SELECT maker
+FROM product p
+INNER JOIN laptop l
+ON p.model = l.model
+WHERE speed >= 750;
+
+-- Перечислите номера моделей любых типов,
+-- имеющих самую высокую цену по всей имеющейся в базе данных продукции.
+
+WITH model_max_prices AS (
+    SELECT model, price
+    FROM pc
+    WHERE price = (SELECT MAX(price) FROM pc)
+    UNION
+    SELECT model, price
+    FROM laptop
+    WHERE price = (SELECT MAX(price) FROM laptop)
+    UNION
+    SELECT model, price
+    FROM printer
+    WHERE price = (SELECT MAX(price) FROM printer)
+)
+SELECT model
+FROM model_max_prices
+WHERE price = (SELECT MAX(price) FROM model_max_prices);
+
+-- Найдите производителей принтеров, которые производят ПК с наименьшим объемом RAM
+-- и с самым быстрым процессором среди всех ПК, имеющих наименьший объем RAM.
+-- Вывести: Maker
+
+WITH pc_models_with_min_ram AS (
+    SELECT model, speed
+    FROM pc
+    WHERE ram = (SELECT MIN(ram) FROM pc)
+)
+SELECT DISTINCT maker
+FROM product
+WHERE type = 'Printer'
+AND maker IN (
+    SELECT DISTINCT maker
+    FROM product
+    WHERE model IN (
+        SELECT DISTINCT model
+        FROM pc_models_with_min_ram
+        WHERE speed = (
+            SELECT MAX(speed)
+            FROM pc_models_with_min_ram
+        )
+    )
+);
+
+-- Найдите среднюю цену ПК и ПК-блокнотов, выпущенных производителем A (латинская буква).
+-- Вывести: одна общая средняя цена.
+
+SELECT AVG(price)
+FROM (
+    SELECT price
+    FROM pc p
+    INNER JOIN product p2
+    ON p.model = p2.model
+    WHERE maker = 'A'
+    UNION ALL
+    SELECT price
+    FROM laptop l
+    INNER JOIN product p
+    ON l.model = p.model
+    WHERE maker = 'A'
+) AS t;
